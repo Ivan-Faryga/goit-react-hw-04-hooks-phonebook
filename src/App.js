@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import Form from "./Components/Form/Form";
 import { v4 as uuidv4 } from "uuid";
 import ContactList from "./Components/ContactList/ContactList";
@@ -12,32 +12,22 @@ const initialState = [
   { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
 ];
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: "",
-  };
+export default function App() {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState([]);
 
-  componentDidMount() {
+  // забираем данные из локал-сторадж при маунте компонента
+  useEffect(() => {
     const parsedContacts = JSON.parse(localStorage.getItem("contacts"));
-    // const contacts = localStorage.getItem("contacts");
-    // const parsedContacts = JSON.parse(contacts);
-    // this.setState({ contacts: parsedContacts });
+    setContacts(parsedContacts ? parsedContacts : initialState);
+  }, []);
 
-    // if (parsedContacts !== null) {
-    //   this.setState({ contacts: parsedContacts });
-    // }
+  // добавляем данные из локал-сторадж при маунте компонента
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
 
-    this.setState({ contacts: parsedContacts ?? initialState }); // ??  --- https://learn.javascript.ru/nullish-coalescing-operator
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    }
-  }
-
-  formSubmitHandler = (object) => {
+  const formSubmitHandler = (object) => {
     const { name, number } = object;
     const { contacts } = this.state;
     if (contacts.map((contact) => contact.name).includes(name.trim()))
@@ -55,7 +45,7 @@ class App extends Component {
     }));
   };
 
-  handleInputFilter = () => {
+  const handleInputFilter = () => {
     const { contacts, filter } = this.state;
     const filterToLowerCase = filter.toLocaleLowerCase().trim();
 
@@ -64,12 +54,12 @@ class App extends Component {
     );
   };
 
-  handleInputChange = (evt) => {
+  const handleInputChange = (evt) => {
     const { name, value } = evt.currentTarget;
     this.setState({ [name]: value });
   };
 
-  deleteContact = (contactId) => {
+  const deleteContact = (contactId) => {
     this.setState((prevState) => ({
       contacts: prevState.contacts.filter(
         (contact) => contact.id !== contactId
@@ -77,25 +67,66 @@ class App extends Component {
     }));
   };
 
-  render() {
-    return (
-      <div className="App">
-        <div className="InputWrapper">
-          <h1 className="inputTitle">Phonebook</h1>
-          <Form onSubmit={this.formSubmitHandler} />
-          <br />
-          <Filter value={this.state.filter} onChange={this.handleInputChange} />
-        </div>
-        <div className="contactsSection">
-          <h2 className="contactsSectionTitle">Contacts</h2>
-          <ContactList
-            contacts={this.handleInputFilter()}
-            onDelete={this.deleteContact}
-          />
-        </div>
+  return (
+    <div className="App">
+      <div className="InputWrapper">
+        <h1 className="inputTitle">Phonebook</h1>
+        <Form onSubmit={formSubmitHandler} />
+        <br />
+        <Filter value={filter} onChange={handleInputChange} />
       </div>
-    );
-  }
+      <div className="contactsSection">
+        <h2 className="contactsSectionTitle">Contacts</h2>
+        <ContactList contacts={handleInputFilter()} onDelete={deleteContact} />
+      </div>
+    </div>
+  );
 }
 
-export default App;
+// class App extends Component {
+//   state = {
+//     contacts: [],
+//     filter: "",
+//   };
+
+// componentDidMount() {
+//   const parsedContacts = JSON.parse(localStorage.getItem("contacts"));
+//   //====// const contacts = localStorage.getItem("contacts");
+//   //====// const parsedContacts = JSON.parse(contacts);
+//   //====// this.setState({ contacts: parsedContacts });
+
+//   //====// if (parsedContacts !== null) {
+//   //====//   this.setState({ contacts: parsedContacts });
+//   //====// }
+
+//   this.setState({ contacts: parsedContacts ?? initialState }); // ??  --- https://learn.javascript.ru/nullish-coalescing-operator
+// }
+
+// componentDidUpdate(prevProps, prevState) {
+//   if (this.state.contacts !== prevState.contacts) {
+//     localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
+//   }
+// }
+
+//   render() {
+//     return (
+//       <div className="App">
+//         <div className="InputWrapper">
+//           <h1 className="inputTitle">Phonebook</h1>
+//           <Form onSubmit={this.formSubmitHandler} />
+//           <br />
+//           <Filter value={this.state.filter} onChange={this.handleInputChange} />
+//         </div>
+//         <div className="contactsSection">
+//           <h2 className="contactsSectionTitle">Contacts</h2>
+//           <ContactList
+//             contacts={this.handleInputFilter()}
+//             onDelete={this.deleteContact}
+//           />
+//         </div>
+//       </div>
+//     );
+//   }
+// }
+
+// export default App;
