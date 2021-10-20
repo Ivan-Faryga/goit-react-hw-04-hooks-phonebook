@@ -14,7 +14,7 @@ const initialState = [
 
 export default function App() {
   const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState("");
 
   // забираем данные из локал-сторадж при маунте компонента
   useEffect(() => {
@@ -22,14 +22,13 @@ export default function App() {
     setContacts(parsedContacts ? parsedContacts : initialState);
   }, []);
 
-  // добавляем данные из локал-сторадж при маунте компонента
+  // добавляем данные из локал-сторадж при апдейте компонента
   useEffect(() => {
     localStorage.setItem("contacts", JSON.stringify(contacts));
   }, [contacts]);
 
   const formSubmitHandler = (object) => {
     const { name, number } = object;
-    const { contacts } = this.state;
     if (contacts.map((contact) => contact.name).includes(name.trim()))
       return alert(`"${name.trim()}" is already in contacts`);
     if (contacts.map((contact) => contact.number).includes(number.trim()))
@@ -40,13 +39,10 @@ export default function App() {
       name,
       number,
     };
-    this.setState((prevState) => ({
-      contacts: [...prevState.contacts, newObject],
-    }));
+    setContacts([...contacts, newObject]);
   };
 
   const handleInputFilter = () => {
-    const { contacts, filter } = this.state;
     const filterToLowerCase = filter.toLocaleLowerCase().trim();
 
     return contacts.filter((contact) =>
@@ -55,16 +51,11 @@ export default function App() {
   };
 
   const handleInputChange = (evt) => {
-    const { name, value } = evt.currentTarget;
-    this.setState({ [name]: value });
+    setFilter(evt.currentTarget.value);
   };
 
   const deleteContact = (contactId) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter(
-        (contact) => contact.id !== contactId
-      ),
-    }));
+    setContacts([...contacts.filter((contact) => contact.id !== contactId)]);
   };
 
   return (
